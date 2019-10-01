@@ -9,9 +9,10 @@ export class Visualizer extends Component {
             indexA : -1,
             indexB : -1
         },
-        blankData : {
-            indexA : -1,
-            indexB : -1
+        bubbleSortData : {
+            pass : 0,
+            index : -1,
+            swapsDone : -1
         }
     };
 
@@ -27,7 +28,7 @@ export class Visualizer extends Component {
         }
 
         this.setState({array});
-        setInterval(this.doProcess,100);
+        setInterval(this.doProcess,10);
     }
 
     doProcess = () => {
@@ -48,16 +49,42 @@ export class Visualizer extends Component {
             }
 
             this.setState({array, currentProcess, scrambleData});
+        } else if (currentProcess === 'bubble') {
+            let {array, bubbleSortData} = this.state;
+
+            if (bubbleSortData.swapsDone === 0 && bubbleSortData.index >= array.length-2) {
+                currentProcess = '';
+
+                array[bubbleSortData.index].checking = false;
+                array[bubbleSortData.index+1].checking = false;
+
+                bubbleSortData.index = -1;
+                bubbleSortData.swapsDone = -1;
+                bubbleSortData.pass = 0;
+            } else {
+                this.bubble(array, bubbleSortData);
+            }
+
+            this.setState({array, currentProcess, bubbleSortData});
         }
     };
 
     doScramble = () => {
-        let {currentProcess, scrambleData} = this.state;
+        let {currentProcess} = this.state;
 
         currentProcess = 'scramble';
 
-        this.setState({currentProcess, scrambleData});
+        this.setState({currentProcess});
     };
+
+    doBubbleSort = () => {
+        let {currentProcess} = this.state;
+
+        currentProcess = 'bubble';
+
+        this.setState({currentProcess});
+    };
+
 
     getRndInteger(min, max) {
         return Math.floor(Math.random() * (max - min) ) + min;
@@ -78,46 +105,80 @@ export class Visualizer extends Component {
         }
     };
 
-    scramble = (array, scramble) => {
+    scramble = (array, data) => {
 
-        if (scramble.indexA !== -1) {
-            array[scramble.indexB].checking = false;
-            array[scramble.indexA].checking = false;
+        if (data.indexA !== -1) {
+            array[data.indexB].checking = false;
+            array[data.indexA].checking = false;
         }
 
-        scramble.indexA ++;
+        data.indexA ++;
 
-        let min = scramble.indexA;
+        let min = data.indexA;
         let max = array.length-1;
 
-        let valueA = array[scramble.indexA].value;
-        scramble.indexB = this.getRndInteger(min,max);
+        let valueA = array[data.indexA].value;
+        data.indexB = this.getRndInteger(min,max);
 
-        let valueB = array[scramble.indexB].value;
+        let valueB = array[data.indexB].value;
 
-        array[scramble.indexB].value = valueA;
-        array[scramble.indexB].checking = true;
-        array[scramble.indexA].value = valueB;
-        array[scramble.indexA].checking = true;
+        array[data.indexB].value = valueA;
+        array[data.indexB].checking = true;
+        array[data.indexA].value = valueB;
+        array[data.indexA].checking = true;
 
     };
 
+    bubble = (array, data) => {
+
+        if (data.index !== -1) {
+            array[data.index].checking = false;
+            array[data.index+1].checking = false;
+        }
+
+        data.index ++;
+
+        if (data.index >= array.length-1) {
+            data.index = 0;
+            data.swapsDone = 0;
+            data.pass ++;
+        }
+
+        let valueA = array[data.index].value;
+        let valueB = array[data.index+1].value;
+
+        array[data.index].checking = true;
+        array[data.index+1].checking = true;
+
+        if (valueA > valueB) {
+            data.swapsDone ++;
+            array[data.index + 1].value = valueA;
+            array[data.index].value = valueB;
+        }
+    };
     render() {
         const {array} = this.state;
 
 
         return (
             <div className='view'>
+
                 <div className='graph'>
-                {array.map(item => {return(
-                    <div key={item.value} className='bar'>
-                        <div style={{height: (item.value*2)+'px' }} className={'value '+(item.checking?'selected':'')}>
+                    {array.map(item => {return(
+                        <div key={item.value} className='bar'>
+                            <div style={{height: (item.value*2)+'px' }} className={'value '+(item.checking?'selected':'')}>
+                            </div>
                         </div>
-                    </div>
-                )})}
+                    )})}
                 </div>
-                <div className='btn' onClick={this.doScramble}>
-                    Scramble
+
+                <div className='panel'>
+                    <div className='btn' onClick={this.doScramble}>
+                        Scramble
+                    </div>
+                    <div className='btn' onClick={this.doBubbleSort}>
+                        Bubble
+                    </div>
                 </div>
             </div>
         );

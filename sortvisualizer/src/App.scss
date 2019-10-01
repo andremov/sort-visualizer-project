@@ -57,16 +57,22 @@ body {
       }
     }
   }
+  .panel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
 
-  .btn {
-    cursor: pointer;
-    background-color: #09d3ac;
-    border-radius: 5px;
-    width: 200px;
-    height: 50px;
-    padding: 7px;
-    box-sizing: border-box;
-    font-size: 2em;
+    .btn {
+      cursor: pointer;
+      background-color: #09d3ac;
+      border-radius: 5px;
+      width: 200px;
+      height: 50px;
+      padding: 7px;
+      box-sizing: border-box;
+      font-size: 2em;
+   }
  }
 
 }
