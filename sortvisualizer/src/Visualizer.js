@@ -66,6 +66,23 @@ export class Visualizer extends Component {
             }
 
             this.setState({array, currentProcess, bubbleSortData});
+        }else if (currentProcess === 'bubble2') {
+            let {array, bubbleSortData} = this.state;
+
+            if (bubbleSortData.swapsDone === 0 && bubbleSortData.index >= array.length-2-bubbleSortData.pass) {
+                currentProcess = '';
+
+                array[bubbleSortData.index].checking = false;
+                array[bubbleSortData.index+1].checking = false;
+
+                bubbleSortData.index = -1;
+                bubbleSortData.swapsDone = -1;
+                bubbleSortData.pass = 0;
+            } else {
+                this.bubble2(array, bubbleSortData);
+            }
+
+            this.setState({array, currentProcess, bubbleSortData});
         }
     };
 
@@ -85,6 +102,13 @@ export class Visualizer extends Component {
         this.setState({currentProcess});
     };
 
+    doBubble2Sort = () => {
+        let {currentProcess} = this.state;
+
+        currentProcess = 'bubble2';
+
+        this.setState({currentProcess});
+    };
 
     getRndInteger(min, max) {
         return Math.floor(Math.random() * (max - min) ) + min;
@@ -156,6 +180,35 @@ export class Visualizer extends Component {
             array[data.index].value = valueB;
         }
     };
+
+    bubble2 = (array, data) => {
+
+        if (data.index !== -1) {
+            array[data.index].checking = false;
+            array[data.index+1].checking = false;
+        }
+
+        data.index ++;
+
+        if (data.index >= array.length-1-data.pass) {
+            data.index = 0;
+            data.swapsDone = 0;
+            data.pass ++;
+        }
+
+        let valueA = array[data.index].value;
+        let valueB = array[data.index+1].value;
+
+        array[data.index].checking = true;
+        array[data.index+1].checking = true;
+
+        if (valueA > valueB) {
+            data.swapsDone ++;
+            array[data.index + 1].value = valueA;
+            array[data.index].value = valueB;
+        }
+    };
+
     render() {
         const {array} = this.state;
 
@@ -178,6 +231,9 @@ export class Visualizer extends Component {
                     </div>
                     <div className='btn' onClick={this.doBubbleSort}>
                         Bubble
+                    </div>
+                    <div className='btn' onClick={this.doBubble2Sort}>
+                        Bubble2
                     </div>
                 </div>
             </div>
