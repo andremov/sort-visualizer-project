@@ -31,6 +31,17 @@ export class Visualizer extends Component {
                 pass
                  */
                 data : [-1, -1, -1]
+            },
+            {
+                name: 'Quick',
+                /*
+                parts
+                segment
+                i
+                j
+                dir
+                 */
+                data : [-1, -1, -1, -1, -1]
             }
         ]
     };
@@ -45,6 +56,8 @@ export class Visualizer extends Component {
                 selected : 0
             });
         }
+
+        this.scrambleIterative(array);
 
         this.setState({array});
         this.handleEvent = this.handleEvent.bind(this);
@@ -112,6 +125,13 @@ export class Visualizer extends Component {
             r = (
                 currentProcess.data[1] <= 0 && currentProcess.data[0] >= array.length-3-currentProcess.data[2]
             );
+        } else if (processID === 3) {
+            /*
+                data.parts < data.segment && data.dir === -1
+             */
+            r = (
+                currentProcess.data[0] < currentProcess.data[1] && currentProcess.data[4] === 1
+            );
         }
         return r;
     };
@@ -129,6 +149,8 @@ export class Visualizer extends Component {
             this.bubbleSort(array, data);
         } else if (processID === 2) {
             this.bubbleSort2(array, data);
+        } else if (processID === 3) {
+            this.quickSort(array, data);
         }
     };
 
@@ -238,6 +260,77 @@ export class Visualizer extends Component {
         }
 
         data = [index, swaps, pass];
+        this.saveChanges(array,data);
+    };
+
+    quickSort = (array, data) => {
+        let [parts, segment, i, j, dir] = data;
+        console.log(data);
+        this.clearSelectedElements();
+
+        parts = parts < 0? 1 : parts;
+        segment = segment < 0? 0 : segment;
+
+        if (segment >= parts) {
+            parts *= Math.pow(2,dir*-1);
+            segment = 0;
+        }
+
+        let segSize = Math.floor((array.length-1)/parts);
+
+        let lo = segSize * segment;
+        let hi = lo + segSize;
+        let med = Math.floor(lo + (segSize/2));
+
+        if (segSize <= 3) {
+            dir *= -1;
+            parts *= Math.pow(2,dir*-1);
+            segment = 0;
+            data =  [parts, segment, i, j, dir];
+            this.saveChanges(array,data);
+            return;
+        }
+
+        if (i === -1 && j === -1) {
+            i = lo;
+            j = hi;
+        }
+
+        array[lo].selected = 2;
+        array[hi].selected = 2;
+        array[med].selected = 3;
+        array[i].selected = 1;
+        array[j].selected = 1;
+
+        let pivot = array[med].value;
+
+        if (array[i].value < pivot) {
+            i = i + 1;
+            data =  [parts, segment, i, j, dir];
+            this.saveChanges(array,data);
+            return;
+        }
+
+        if (array[j].value > pivot) {
+            j = j - 1;
+            data =  [parts, segment, i, j, dir];
+            this.saveChanges(array,data);
+            return;
+        }
+
+        if (i >= j) {
+            segment ++;
+            i = -1;
+            j = -1;
+            data =  [parts, segment, i, j, dir];
+            this.saveChanges(array,data);
+            return;
+        }
+
+        let valueA = array[i].value;
+        array[i].value = array[j].value;
+        array[j].value = valueA;
+        data =  [parts, segment, i, j, dir];
         this.saveChanges(array,data);
     };
 
