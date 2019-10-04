@@ -51,6 +51,21 @@ export class Visualizer extends Component {
         setInterval(this.update,10);
     }
 
+    scrambleIterative = (array) => {
+        for (let i = 0; i < array.length; i++) {
+            let min = i+1;
+            let max = array.length-1;
+
+            let valueA = array[i].value;
+            let shuffleIndex = this.getRndInteger(min,max);
+
+            let valueB = array[shuffleIndex].value;
+
+            array[shuffleIndex].value = valueA;
+            array[i].value = valueB;
+        }
+    };
+
     clearSelectedElements = () => {
         let {array} = this.state;
         for (let i = 0; i < array.length; i++) {
@@ -109,11 +124,11 @@ export class Visualizer extends Component {
 
         const {data} = this.state.sorts[processID];
         if (processID === 0) {
-            this.scramble(array, data);
+            this.scrambleArray(array, data);
         } else if (processID === 1) {
-            this.bubble(array, data);
+            this.bubbleSort(array, data);
         } else if (processID === 2) {
-            this.bubble2(array, data);
+            this.bubbleSort2(array, data);
         }
     };
 
@@ -143,7 +158,7 @@ export class Visualizer extends Component {
         return Math.floor(Math.random() * (max - min) ) + min;
     }
 
-    scramble = (array, data) => {
+    scrambleArray = (array, data) => {
         let [indexA, indexB] = data;
 
         this.clearSelectedElements();
@@ -168,7 +183,7 @@ export class Visualizer extends Component {
         this.saveChanges(array,data);
     };
 
-    bubble = (array, data) => {
+    bubbleSort = (array, data) => {
         let [index, swaps, pass] = data;
 
         this.clearSelectedElements();
@@ -197,7 +212,7 @@ export class Visualizer extends Component {
         this.saveChanges(array,data);
     };
 
-    bubble2 = (array, data) => {
+    bubbleSort2 = (array, data) => {
         let [index, swaps, pass] = data;
 
         this.clearSelectedElements();
