@@ -4,16 +4,35 @@ export class Visualizer extends Component {
 
     state = {
         array : [],
-        currentProcess : '',
-        scrambleData : {
-            indexA : -1,
-            indexB : -1
-        },
-        bubbleSortData : {
-            pass : 0,
-            index : -1,
-            swapsDone : -1
-        }
+        processID : -1,
+        sorts : [
+            {
+                name: 'Scramble',
+                /*
+                indexA
+                indexB
+                 */
+                data : [-1, -1]
+            },
+            {
+                name: 'Bubble',
+                /*
+                index
+                swaps
+                pass
+                 */
+                data : [-1, -1, -1]
+            },
+            {
+                name: 'Bubble2',
+                /*
+                index
+                swaps
+                pass
+                 */
+                data : [-1, -1, -1]
+            }
+        ]
     };
 
     componentDidMount() {
@@ -23,195 +42,193 @@ export class Visualizer extends Component {
         for (let i = 0; i < maxValue; i++) {
             array.push({
                 value : i+1,
-                checking : false
+                selected : false
             });
         }
 
         this.setState({array});
-        setInterval(this.doProcess,10);
+        this.handleEvent = this.handleEvent.bind(this);
+        setInterval(this.update,10);
     }
 
+    clearSelectedElements = () => {
+        let {array} = this.state;
+        for (let i = 0; i < array.length; i++) {
+            array[i].selected = false;
+        }
+        this.setState({array});
+    };
+
+    clearProcess = () => {
+        let {processID} = this.state;
+        let sorts = this.state.sorts;
+        let currentProcess = sorts[processID];
+
+        processID = -1;
+        // eslint-disable-next-line no-unused-vars
+        for (let i = 0; i < currentProcess.data.length; i++) {
+            currentProcess.data[i] = -1;
+        }
+
+        this.setState({processID, sorts});
+    };
+
+    finished = () => {
+        const {processID, array} = this.state;
+        const currentProcess = this.state.sorts[processID];
+        let r;
+        if (processID === 0) {
+            /*
+            scrambleData.indexA === array.length-1
+             */
+            r = (
+                currentProcess.data[0] === array.length-1
+            );
+        } else if (processID === 1) {
+            /*
+            bubbleSortData.swapsDone === 0 && bubbleSortData.index >= array.length-2
+             */
+            r = (
+                currentProcess.data[1] <= 0 && currentProcess.data[0] >= array.length-2
+            );
+        } else if (processID === 2) {
+            /*
+            bubbleSortData.swapsDone === 0 && bubbleSortData.index >= array.length-2-bubbleSortData.pass
+             */
+            r = (
+                currentProcess.data[1] <= 0 && currentProcess.data[0] >= array.length-3-currentProcess.data[2]
+            );
+        }
+        return r;
+    };
+
     doProcess = () => {
-        let {currentProcess} = this.state;
-        if (currentProcess === 'scramble') {
-            let {array, scrambleData} = this.state;
+        const {processID, array} = this.state;
 
-            if (scrambleData.indexA === array.length-1) {
-                currentProcess = '';
+        if (processID === -1)
+            return;
 
-                array[scrambleData.indexB].checking = false;
-                array[scrambleData.indexA].checking = false;
-
-                scrambleData.indexA = -1;
-                scrambleData.indexB = -1;
-            } else {
-                this.scramble(array, scrambleData);
-            }
-
-            this.setState({array, currentProcess, scrambleData});
-        } else if (currentProcess === 'bubble') {
-            let {array, bubbleSortData} = this.state;
-
-            if (bubbleSortData.swapsDone === 0 && bubbleSortData.index >= array.length-2) {
-                currentProcess = '';
-
-                array[bubbleSortData.index].checking = false;
-                array[bubbleSortData.index+1].checking = false;
-
-                bubbleSortData.index = -1;
-                bubbleSortData.swapsDone = -1;
-                bubbleSortData.pass = 0;
-            } else {
-                this.bubble(array, bubbleSortData);
-            }
-
-            this.setState({array, currentProcess, bubbleSortData});
-        }else if (currentProcess === 'bubble2') {
-            let {array, bubbleSortData} = this.state;
-
-            if (bubbleSortData.swapsDone === 0 && bubbleSortData.index >= array.length-2-bubbleSortData.pass) {
-                currentProcess = '';
-
-                array[bubbleSortData.index].checking = false;
-                array[bubbleSortData.index+1].checking = false;
-
-                bubbleSortData.index = -1;
-                bubbleSortData.swapsDone = -1;
-                bubbleSortData.pass = 0;
-            } else {
-                this.bubble2(array, bubbleSortData);
-            }
-
-            this.setState({array, currentProcess, bubbleSortData});
+        const {data} = this.state.sorts[processID];
+        if (processID === 0) {
+            this.scramble(array, data);
+        } else if (processID === 1) {
+            this.bubble(array, data);
+        } else if (processID === 2) {
+            this.bubble2(array, data);
         }
     };
 
-    doScramble = () => {
-        let {currentProcess} = this.state;
-
-        currentProcess = 'scramble';
-
-        this.setState({currentProcess});
+    saveChanges = (array, data) => {
+        this.setState({array});
+        let {processID, sorts} = this.state;
+        sorts[processID].data = data;
+        this.setState({sorts});
     };
 
-    doBubbleSort = () => {
-        let {currentProcess} = this.state;
-
-        currentProcess = 'bubble';
-
-        this.setState({currentProcess});
+    update = () => {
+        if (this.finished()) {
+            this.clearSelectedElements();
+            this.clearProcess();
+        } else {
+            this.doProcess();
+        }
     };
 
-    doBubble2Sort = () => {
-        let {currentProcess} = this.state;
-
-        currentProcess = 'bubble2';
-
-        this.setState({currentProcess});
+    handleEvent = id => {
+        if (this.state.processID === -1) {
+            this.setState({processID: id});
+        }
     };
 
     getRndInteger(min, max) {
         return Math.floor(Math.random() * (max - min) ) + min;
     }
 
-    scrambleIterative = (array) => {
-        for (let i = 0; i < array.length; i++) {
-            let min = i+1;
-            let max = array.length-1;
-
-            let valueA = array[i].value;
-            let shuffleIndex = this.getRndInteger(min,max);
-
-            let valueB = array[shuffleIndex].value;
-
-            array[shuffleIndex].value = valueA;
-            array[i].value = valueB;
-        }
-    };
-
     scramble = (array, data) => {
+        let [indexA, indexB] = data;
 
-        if (data.indexA !== -1) {
-            array[data.indexB].checking = false;
-            array[data.indexA].checking = false;
-        }
+        this.clearSelectedElements();
 
-        data.indexA ++;
+        indexA ++;
 
-        let min = data.indexA;
+        let min = indexA;
         let max = array.length-1;
 
-        let valueA = array[data.indexA].value;
-        data.indexB = this.getRndInteger(min,max);
+        let valueA = array[indexA].value;
+        indexB = this.getRndInteger(min,max);
 
-        let valueB = array[data.indexB].value;
+        let valueB = array[indexB].value;
 
-        array[data.indexB].value = valueA;
-        array[data.indexB].checking = true;
-        array[data.indexA].value = valueB;
-        array[data.indexA].checking = true;
+        array[indexB].value = valueA;
+        array[indexB].selected = true;
+        array[indexA].value = valueB;
+        array[indexA].selected = true;
 
+        data = [indexA, indexB];
+
+        this.saveChanges(array,data);
     };
 
     bubble = (array, data) => {
+        let [index, swaps, pass] = data;
 
-        if (data.index !== -1) {
-            array[data.index].checking = false;
-            array[data.index+1].checking = false;
+        this.clearSelectedElements();
+
+        index ++;
+
+        if (index >= array.length-1) {
+            index = 0;
+            swaps = 0;
+            pass ++;
         }
 
-        data.index ++;
+        let valueA = array[index].value;
+        let valueB = array[index+1].value;
 
-        if (data.index >= array.length-1) {
-            data.index = 0;
-            data.swapsDone = 0;
-            data.pass ++;
-        }
-
-        let valueA = array[data.index].value;
-        let valueB = array[data.index+1].value;
-
-        array[data.index].checking = true;
-        array[data.index+1].checking = true;
+        array[index].selected = true;
+        array[index+1].selected = true;
 
         if (valueA > valueB) {
-            data.swapsDone ++;
-            array[data.index + 1].value = valueA;
-            array[data.index].value = valueB;
+            swaps ++;
+            array[index + 1].value = valueA;
+            array[index].value = valueB;
         }
+
+        data = [index, swaps, pass];
+        this.saveChanges(array,data);
     };
 
     bubble2 = (array, data) => {
+        let [index, swaps, pass] = data;
 
-        if (data.index !== -1) {
-            array[data.index].checking = false;
-            array[data.index+1].checking = false;
+        this.clearSelectedElements();
+
+        index ++;
+
+        if (index >= array.length-2-pass) {
+            index = 0;
+            swaps = 0;
+            pass ++;
         }
 
-        data.index ++;
+        let valueA = array[index].value;
+        let valueB = array[index+1].value;
 
-        if (data.index >= array.length-1-data.pass) {
-            data.index = 0;
-            data.swapsDone = 0;
-            data.pass ++;
-        }
-
-        let valueA = array[data.index].value;
-        let valueB = array[data.index+1].value;
-
-        array[data.index].checking = true;
-        array[data.index+1].checking = true;
+        array[index].selected = true;
+        array[index+1].selected = true;
 
         if (valueA > valueB) {
-            data.swapsDone ++;
-            array[data.index + 1].value = valueA;
-            array[data.index].value = valueB;
+            swaps ++;
+            array[index + 1].value = valueA;
+            array[index].value = valueB;
         }
+
+        data = [index, swaps, pass];
+        this.saveChanges(array,data);
     };
 
     render() {
-        const {array} = this.state;
-
+        const {sorts, array} = this.state;
 
         return (
             <div className='view'>
@@ -219,22 +236,18 @@ export class Visualizer extends Component {
                 <div className='graph'>
                     {array.map(item => {return(
                         <div key={item.value} className='bar'>
-                            <div style={{height: (item.value*2)+'px' }} className={'value '+(item.checking?'selected':'')}>
+                            <div style={{height: (item.value*2)+'px' }} className={'value '+(item.selected?'selected':'')}>
                             </div>
                         </div>
                     )})}
                 </div>
 
                 <div className='panel'>
-                    <div className='btn' onClick={this.doScramble}>
-                        Scramble
-                    </div>
-                    <div className='btn' onClick={this.doBubbleSort}>
-                        Bubble
-                    </div>
-                    <div className='btn' onClick={this.doBubble2Sort}>
-                        Bubble2
-                    </div>
+                    {sorts.map(item => {return(
+                        <div key={sorts.indexOf(item)} className='btn' onClick={(e) => this.handleEvent(sorts.indexOf(item))}>
+                            {item.name}
+                        </div>
+                    )})}
                 </div>
             </div>
         );
