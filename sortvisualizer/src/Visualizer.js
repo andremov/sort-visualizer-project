@@ -42,7 +42,7 @@ export class Visualizer extends Component {
         for (let i = 0; i < maxValue; i++) {
             array.push({
                 value : i+1,
-                selected : false
+                selected : 0
             });
         }
 
@@ -54,7 +54,7 @@ export class Visualizer extends Component {
     clearSelectedElements = () => {
         let {array} = this.state;
         for (let i = 0; i < array.length; i++) {
-            array[i].selected = false;
+            array[i].selected = 0;
         }
         this.setState({array});
     };
@@ -65,7 +65,6 @@ export class Visualizer extends Component {
         let currentProcess = sorts[processID];
 
         processID = -1;
-        // eslint-disable-next-line no-unused-vars
         for (let i = 0; i < currentProcess.data.length; i++) {
             currentProcess.data[i] = -1;
         }
@@ -79,21 +78,21 @@ export class Visualizer extends Component {
         let r;
         if (processID === 0) {
             /*
-            scrambleData.indexA === array.length-1
+            data.indexA === array.length-1
              */
             r = (
                 currentProcess.data[0] === array.length-1
             );
         } else if (processID === 1) {
             /*
-            bubbleSortData.swapsDone === 0 && bubbleSortData.index >= array.length-2
+            data.swapsDone === 0 && data.index >= array.length-2
              */
             r = (
                 currentProcess.data[1] <= 0 && currentProcess.data[0] >= array.length-2
             );
         } else if (processID === 2) {
             /*
-            bubbleSortData.swapsDone === 0 && bubbleSortData.index >= array.length-2-bubbleSortData.pass
+            data.swapsDone === 0 && data.index >= array.length-2-data.pass
              */
             r = (
                 currentProcess.data[1] <= 0 && currentProcess.data[0] >= array.length-3-currentProcess.data[2]
@@ -160,9 +159,9 @@ export class Visualizer extends Component {
         let valueB = array[indexB].value;
 
         array[indexB].value = valueA;
-        array[indexB].selected = true;
+        array[indexB].selected = 1;
         array[indexA].value = valueB;
-        array[indexA].selected = true;
+        array[indexA].selected = 2;
 
         data = [indexA, indexB];
 
@@ -185,8 +184,8 @@ export class Visualizer extends Component {
         let valueA = array[index].value;
         let valueB = array[index+1].value;
 
-        array[index].selected = true;
-        array[index+1].selected = true;
+        array[index].selected = 1;
+        array[index+1].selected = 1;
 
         if (valueA > valueB) {
             swaps ++;
@@ -214,8 +213,8 @@ export class Visualizer extends Component {
         let valueA = array[index].value;
         let valueB = array[index+1].value;
 
-        array[index].selected = true;
-        array[index+1].selected = true;
+        array[index].selected = 1;
+        array[index+1].selected = 1;
 
         if (valueA > valueB) {
             swaps ++;
@@ -229,6 +228,7 @@ export class Visualizer extends Component {
 
     render() {
         const {sorts, array} = this.state;
+        const styles = ['','one', 'two','three','four'];
 
         return (
             <div className='view'>
@@ -236,7 +236,7 @@ export class Visualizer extends Component {
                 <div className='graph'>
                     {array.map(item => {return(
                         <div key={item.value} className='bar'>
-                            <div style={{height: (item.value*2)+'px' }} className={'value '+(item.selected?'selected':'')}>
+                            <div style={{height: (item.value*2)+'px' }} className={'value '+(item.selected > 0?'selected '+styles[item.selected]:'')}>
                             </div>
                         </div>
                     )})}

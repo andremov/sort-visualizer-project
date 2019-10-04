@@ -52,8 +52,20 @@ body {
         background-color: #09d3ac;
 
         &.selected {
-          background-color: #FFFFFF;
+          &.one {
+            background-color: #FFF;
+          }
+          &.two {
+            background-color: #F55;
+          }
+          &.three {
+            background-color: #5F5;
+          }
+          &.four {
+            background-color: #55F;
+          }
         }
+
       }
     }
   }
