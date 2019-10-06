@@ -226,16 +226,12 @@ export class Visualizer extends Component {
             pass ++;
         }
 
-        let valueA = array[index].value;
-        let valueB = array[index+1].value;
-
         array = this.setSelected(array, index, 1);
         array = this.setSelected(array, index+1, 1);
 
-        if (valueA > valueB) {
+        if (array[index].value > array[index+1].value) {
             swaps ++;
-            array[index + 1].value = valueA;
-            array[index].value = valueB;
+            array = this.swapValues(array,index,index+1);
         }
 
         data = [index, swaps, pass];
@@ -255,16 +251,12 @@ export class Visualizer extends Component {
             pass ++;
         }
 
-        let valueA = array[index].value;
-        let valueB = array[index+1].value;
+        array = this.setSelected(array, index, 1);
+        array = this.setSelected(array, index+1, 1);
 
-        array[index].selected = 1;
-        array[index+1].selected = 1;
-
-        if (valueA > valueB) {
+        if (array[index].value > array[index+1].value) {
             swaps ++;
-            array[index + 1].value = valueA;
-            array[index].value = valueB;
+            array = this.swapValues(array,index,index+1);
         }
 
         data = [index, swaps, pass];
@@ -343,16 +335,18 @@ export class Visualizer extends Component {
 
     quickSort2 = (array, data) => {
         let [parts, segment, i, j, dir] = data;
+        let low = 0;
+        let high = 0;
         this.clearSelectedElements();
 
         /* low  --> Starting index,  high  --> Ending index */
         if (low < high) {
             /* pi is partitioning index, arr[pi] is now
                at right place */
-            let pi = partition(arr, low, high);
+            let pi = this.partition(array, low, high);
 
-            quickSort(arr, low, pi - 1);  // Before pi
-            quickSort(arr, pi + 1, high); // After pi
+            this.quickSort2(array, low, pi - 1);  // Before pi
+            this.quickSort2(array, pi + 1, high); // After pi
         }
     };
 
@@ -361,25 +355,29 @@ export class Visualizer extends Component {
     array, and places all smaller (smaller than pivot)
     to left of pivot and all greater elements to right
     of pivot */
+
     partition = (array, data) => {
         // pivot (Element to be placed at right position)
-        let pivot = arr[high];
+        let high = 0;
+        let low = 0;
+        let pivot = array[high];
 
         let i = (low - 1)  // Index of smaller element
 
         for (let j = low; j <= high - 1; j++)
         {
             // If current element is smaller than the pivot
-            if (arr[j] < pivot);
+            if (array[j] < pivot);
             {
                 i++;
                 // increment index of smaller element
-                swap arr[i] and arr[j];
+
+                array = this.swapValues(array,i,j);
             }
         }
-        swap arr[i + 1] and arr[high]);
+        array = this.swapValues(array,i+1, high);
         return (i + 1);
-    }
+    };
 
     render() {
         const {sorts, array} = this.state;
