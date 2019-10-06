@@ -10,9 +10,8 @@ export class Visualizer extends Component {
                 name: 'Scramble',
                 /*
                 indexA
-                indexB
                  */
-                data : [-1, -1]
+                data : [-1]
             },
             {
                 name: 'Bubble',
@@ -47,7 +46,6 @@ export class Visualizer extends Component {
     };
 
     componentDidMount() {
-
         let maxValue = 100;
         let array = [];
         for (let i = 0; i < maxValue; i++) {
@@ -180,8 +178,21 @@ export class Visualizer extends Component {
         return Math.floor(Math.random() * (max - min) ) + min;
     }
 
+    setSelected = (array, index, value) => {
+      array[index].selected = value;
+      return array;
+    };
+
+    swapValues = (array, indexA, indexB) => {
+        let valueA = array[indexA].value;
+        array[indexA] = array[indexB].value;
+        array[indexB] = valueA;
+
+        return array;
+    };
+
     scrambleArray = (array, data) => {
-        let [indexA, indexB] = data;
+        let [indexA] = data;
 
         this.clearSelectedElements();
 
@@ -190,17 +201,14 @@ export class Visualizer extends Component {
         let min = indexA;
         let max = array.length-1;
 
-        let valueA = array[indexA].value;
-        indexB = this.getRndInteger(min,max);
+        let indexB = this.getRndInteger(min,max);
 
-        let valueB = array[indexB].value;
+        array = this.swapValues(array, indexA, indexB);
 
-        array[indexB].value = valueA;
-        array[indexB].selected = 1;
-        array[indexA].value = valueB;
-        array[indexA].selected = 2;
+        array = this.setSelected(array, indexB, 1);
+        array = this.setSelected(array, indexA, 2);
 
-        data = [indexA, indexB];
+        data = [indexA];
 
         this.saveChanges(array,data);
     };
@@ -221,8 +229,8 @@ export class Visualizer extends Component {
         let valueA = array[index].value;
         let valueB = array[index+1].value;
 
-        array[index].selected = 1;
-        array[index+1].selected = 1;
+        array = this.setSelected(array, index, 1);
+        array = this.setSelected(array, index+1, 1);
 
         if (valueA > valueB) {
             swaps ++;
