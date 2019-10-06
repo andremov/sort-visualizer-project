@@ -285,7 +285,7 @@ export class Visualizer extends Component {
 
         let lo = segSize * segment;
         let hi = lo + segSize;
-        let med = Math.floor(lo + (segSize/2));
+        // let med = Math.floor(lo + (segSize/2));
 
         if (segSize <= 3) {
             dir *= -1;
@@ -301,13 +301,15 @@ export class Visualizer extends Component {
             j = hi;
         }
 
-        array[lo].selected = 2;
-        array[hi].selected = 2;
-        array[med].selected = 3;
-        array[i].selected = 1;
-        array[j].selected = 1;
+        array = this.setSelected(array, lo, 2);
+        array = this.setSelected(array, hi, 2);
 
-        let pivot = array[med].value;
+        // array = this.setSelected(array, med, 3);
+
+        array = this.setSelected(array, i, 1);
+        // array = this.setSelected(array, j, 1);
+
+        let pivot = array[hi].value;
 
         if (array[i].value < pivot) {
             i = i + 1;
@@ -315,14 +317,14 @@ export class Visualizer extends Component {
             this.saveChanges(array,data);
             return;
         }
-
+/*
         if (array[j].value > pivot) {
             j = j - 1;
             data =  [parts, segment, i, j, dir];
             this.saveChanges(array,data);
             return;
         }
-
+ */
         if (i >= j) {
             segment ++;
             i = -1;
@@ -332,9 +334,8 @@ export class Visualizer extends Component {
             return;
         }
 
-        let valueA = array[i].value;
-        array[i].value = array[j].value;
-        array[j].value = valueA;
+        array = this.swapValues(array,i,hi);
+
         data =  [parts, segment, i, j, dir];
         this.saveChanges(array,data);
     };
