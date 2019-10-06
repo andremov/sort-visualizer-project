@@ -46,7 +46,7 @@ export class Visualizer extends Component {
     };
 
     componentDidMount() {
-        let maxValue = 100;
+        let maxValue = 20;
         let array = [];
         for (let i = 0; i < maxValue; i++) {
             array.push({
@@ -80,7 +80,7 @@ export class Visualizer extends Component {
     clearSelectedElements = () => {
         let {array} = this.state;
         for (let i = 0; i < array.length; i++) {
-            array[i].selected = 0;
+            array = this.setSelected(array, i, 0);
         }
         this.setState({array});
     };
@@ -389,7 +389,7 @@ export class Visualizer extends Component {
                 <div className='graph'>
                     {array.map(item => {return(
                         <div key={item.value} className='bar'>
-                            <div style={{height: (item.value*2)+'px' }} className={'value '+(item.selected > 0?'selected '+styles[item.selected]:'')}>
+                            <div style={{height: ((item.value/array.length)*90)+'%' }} className={'value '+(item.selected > 0?'selected '+styles[item.selected]:'')}>
                             </div>
                         </div>
                     )})}

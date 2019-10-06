@@ -44,9 +44,10 @@ body {
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
+    height: 80vh;
 
     .bar {
-      width: 0.5vw;
+      width: 04vw;
 
       .value {
         background-color: #09d3ac;
