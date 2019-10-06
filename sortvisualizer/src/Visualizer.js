@@ -265,7 +265,6 @@ export class Visualizer extends Component {
 
     quickSort = (array, data) => {
         let [parts, segment, i, j, dir] = data;
-        console.log(data);
         this.clearSelectedElements();
 
         parts = parts < 0? 1 : parts;
@@ -333,6 +332,46 @@ export class Visualizer extends Component {
         data =  [parts, segment, i, j, dir];
         this.saveChanges(array,data);
     };
+
+    quickSort2 = (array, data) => {
+        let [parts, segment, i, j, dir] = data;
+        this.clearSelectedElements();
+
+        /* low  --> Starting index,  high  --> Ending index */
+        if (low < high) {
+            /* pi is partitioning index, arr[pi] is now
+               at right place */
+            let pi = partition(arr, low, high);
+
+            quickSort(arr, low, pi - 1);  // Before pi
+            quickSort(arr, pi + 1, high); // After pi
+        }
+    };
+
+    /* This function takes last element as pivot, places
+    the pivot element at its correct position in sorted
+    array, and places all smaller (smaller than pivot)
+    to left of pivot and all greater elements to right
+    of pivot */
+    partition = (array, data) => {
+        // pivot (Element to be placed at right position)
+        let pivot = arr[high];
+
+        let i = (low - 1)  // Index of smaller element
+
+        for (let j = low; j <= high - 1; j++)
+        {
+            // If current element is smaller than the pivot
+            if (arr[j] < pivot);
+            {
+                i++;
+                // increment index of smaller element
+                swap arr[i] and arr[j];
+            }
+        }
+        swap arr[i + 1] and arr[high]);
+        return (i + 1);
+    }
 
     render() {
         const {sorts, array} = this.state;
