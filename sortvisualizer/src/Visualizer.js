@@ -185,8 +185,8 @@ export class Visualizer extends Component {
 
     swapValues = (array, indexA, indexB) => {
         let valueA = array[indexA].value;
-        array[indexA] = array[indexB].value;
-        array[indexB] = valueA;
+        array[indexA].value = array[indexB].value;
+        array[indexB].value = valueA;
 
         return array;
     };
