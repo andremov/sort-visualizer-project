@@ -59,8 +59,14 @@ export class Visualizer extends Component {
 
         this.setState({array});
         this.handleEvent = this.handleEvent.bind(this);
-        setInterval(this.update,10);
+        setInterval(this.update,100);
     }
+
+    getColor = (value, max) => {
+        let p = ((value/max)*.9)+.1;
+        let v = 'rgba(9,211,172,'+p+')';
+        return v;
+    };
 
     scrambleIterative = (array) => {
         for (let i = 0; i < array.length; i++) {
@@ -350,12 +356,6 @@ export class Visualizer extends Component {
         }
     };
 
-    /* This function takes last element as pivot, places
-    the pivot element at its correct position in sorted
-    array, and places all smaller (smaller than pivot)
-    to left of pivot and all greater elements to right
-    of pivot */
-
     partition = (array, data) => {
         // pivot (Element to be placed at right position)
         let high = 0;
@@ -389,7 +389,7 @@ export class Visualizer extends Component {
                 <div className='graph'>
                     {array.map(item => {return(
                         <div key={item.value} className='bar'>
-                            <div style={{height: ((item.value/array.length)*90)+'%' }} className={'value '+(item.selected > 0?'selected '+styles[item.selected]:'')}>
+                            <div style={{height: ((item.value/array.length)*90)+'%', backgroundColor: this.getColor(item.value,array.length) }} className={'value '+(item.selected > 0?'selected '+styles[item.selected]:'')}>
                             </div>
                         </div>
                     )})}

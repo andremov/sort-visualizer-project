@@ -50,20 +50,20 @@ body {
       width: 04vw;
 
       .value {
-        background-color: #09d3ac;
+       background-color: #09d3ac;
 
         &.selected {
           &.one {
-            background-color: #FFF;
+            background-color: #FFF !important;
           }
           &.two {
-            background-color: #F55;
+            background-color: #F55 !important;;
           }
           &.three {
-            background-color: #5F5;
+            background-color: #5F5 !important;;
           }
           &.four {
-            background-color: #55F;
+            background-color: #55F !important;;
           }
         }
 
