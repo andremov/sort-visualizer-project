@@ -29,7 +29,7 @@ export class Visualizer extends Component {
                 data : [-1, -1, -1]
             },
             {
-                name: 'Bubble2',
+                name: 'Short Bubble',
                 /*
                 index
                 swaps
@@ -190,9 +190,9 @@ export class Visualizer extends Component {
         } else if (processID === 1) {
             this.bubbleSort(array, data);
         } else if (processID === 2) {
-            this.bubbleSort2(array, data);
+            this.shortBubbleSort(array, data);
         } else if (processID === 3) {
-            this.quicksort(array, data);
+            this.quickSort(array, data);
         }
     };
 
@@ -352,9 +352,8 @@ export class Visualizer extends Component {
         this.saveChanges(array,data);
     };
 
-    bubbleSort2 = (array, data) => {
+    shortBubbleSort = (array, data) => {
         let [index, swaps, pass] = data;
-
         this.clearSelectedElements();
 
         index ++;
@@ -377,7 +376,7 @@ export class Visualizer extends Component {
         this.saveChanges(array,data);
     };
 
-    quicksort  = (array, data) => {
+    quickSort  = (array, data) => {
         if (data[0] === -1) {
             data[0] = [-1, -1, -1, -1];
         }
