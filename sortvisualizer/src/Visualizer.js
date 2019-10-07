@@ -5,6 +5,12 @@ export class Visualizer extends Component {
     state = {
         array : [],
         processID : -1,
+        info : {
+            name : '',
+            swaps : 0,
+            access : 0,
+            comparisons : 0
+        },
         sorts : [
             {
                 name: 'Scramble',
@@ -58,15 +64,15 @@ export class Visualizer extends Component {
             });
         }
 
-        this.scrambleIterative(array);
+        // this.scrambleIterative(array);
 
         this.setState({array});
         this.handleEvent = this.handleEvent.bind(this);
-        setInterval(this.update,100);
+        setInterval(this.update,20);
     }
 
     render() {
-        const {sorts, array} = this.state;
+        const {sorts, info, array} = this.state;
         const styles = ['','one', 'two','three','four'];
 
         return (
@@ -80,7 +86,12 @@ export class Visualizer extends Component {
                         </div>
                     )})}
                 </div>
-
+                <div className='info'>
+                    <span>{info.name+ ' sort'}</span>
+                    <span>{info.swaps+' swaps'}</span>
+                    <span>{info.access+' array accesses'}</span>
+                    <span>{info.comparisons+' comparisons'}</span>
+                </div>
                 <div className='panel'>
                     {sorts.map(item => {return(
                         <div key={sorts.indexOf(item)} className='btn' onClick={(e) => this.handleEvent(sorts.indexOf(item))}>
@@ -196,7 +207,16 @@ export class Visualizer extends Component {
 
     handleEvent = id => {
         if (this.state.processID === -1) {
-            this.setState({processID: id});
+            const name = this.state.sorts[id].name;
+            this.setState({
+                processID: id,
+                info : {
+                    name,
+                    swaps : 0,
+                    access : 0,
+                    comparisons : 0
+                }
+            });
         }
     };
 
@@ -213,8 +233,12 @@ export class Visualizer extends Component {
  */
 
     swapValues = (array, indexA, indexB) => {
-        let valueA = array[indexA].value;
-        array[indexA].value = array[indexB].value;
+        let {info} = this.state;
+        info.swaps += 1;
+        this.setState({info});
+
+        let valueA = this.getValue(array,indexA);
+        array[indexA].value = this.getValue(array,indexB);
         array[indexB].value = valueA;
 
         return array;
@@ -269,6 +293,21 @@ export class Visualizer extends Component {
         this.setState({sorts});
     };
 
+    getValue = (array,index) => {
+        let {info} = this.state;
+        info.access += 1;
+        this.setState({info});
+
+        return array[index].value;
+    };
+
+    compareValues = (array, indexA, indexB) => {
+        let {info} = this.state;
+        info.comparisons += 1;
+        this.setState({info});
+        return this.getValue(array,indexA) > this.getValue(array,indexB);
+    };
+
     scrambleIterative = (array) => {
         for (let i = 0; i < array.length; i++) {
             let min = i+1;
@@ -304,7 +343,7 @@ export class Visualizer extends Component {
         array = this.setSelected(array, index, 1);
         array = this.setSelected(array, index+1, 1);
 
-        if (array[index].value > array[index+1].value) {
+        if (this.compareValues(array, index, index+1)) {
             swaps ++;
             array = this.swapValues(array,index,index+1);
         }
@@ -329,7 +368,7 @@ export class Visualizer extends Component {
         array = this.setSelected(array, index, 1);
         array = this.setSelected(array, index+1, 1);
 
-        if (array[index].value > array[index+1].value) {
+        if (this.compareValues(array, index, index+1)) {
             swaps ++;
             array = this.swapValues(array,index,index+1);
         }
@@ -345,7 +384,6 @@ export class Visualizer extends Component {
 
         let [index, right, lo, hi] = data[0];
         this.clearSelectedElements();
-
 
         if (lo < 0) {
             lo = 0;
@@ -372,8 +410,6 @@ export class Visualizer extends Component {
             right = current.length-1;
         }
 
-        let pivotValue = current[pivot].value;
-
         this.setSelected(array, index+lo, 1);
         this.setSelected(array, pivot+lo, 3);
         this.setSelected(array, lo+1, 4);
@@ -381,19 +417,13 @@ export class Visualizer extends Component {
         this.setSelected(array, lo, 2);
         this.setSelected(array, hi-1, 2);
 
-        if(current[index].value < pivotValue) {
+        if(!this.compareValues(current, index, pivot)) {
             index++;
         } else {
             current = this.pushIntoArray(current, current.length-1, index);
             right--;
         }
-/*
-        a = '';
-        for (let i = 0; i < current.length; i++) {
-            a += current[i].value + ', '
-        }
-        console.log(a);
- */
+
         if (index > right) {
             current = this.pushIntoArray(current, index-1, pivot);
 
