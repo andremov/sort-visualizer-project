@@ -47,13 +47,23 @@ export class Visualizer extends Component {
                 hi
                  */
                 data : [-1]
-            },{
-                name: 'Insertion',
+            },
+            {
+                name: 'Insert',
                 /*
                 main
                 alt
                  */
                 data : [-1, -1]
+            },
+            {
+                name: 'Select',
+                /*
+                i
+                j
+                min
+                 */
+                data : [-1, -1, -1]
             },
         ]
     };
@@ -189,6 +199,13 @@ export class Visualizer extends Component {
             r = (
               currentProcess.data[0] === array.length
             );
+        } else if (processID === 5) {
+            /*
+                data.i === array.length
+             */
+            r = (
+                currentProcess.data[0] === array.length-1
+            );
         }
         return r;
     };
@@ -210,6 +227,8 @@ export class Visualizer extends Component {
             this.quickSort(array, data);
         } else if (processID === 4) {
             this.insertSort(array, data);
+        } else if (processID === 5) {
+            this.selectSort(array,data);
         }
     };
 
@@ -474,10 +493,6 @@ export class Visualizer extends Component {
         let [main, alt] = data;
         this.clearSelectedElements();
 
-        if (main === array.length) {
-            return;
-        }
-
         if (main === -1) {
             main = 1;
             alt = main;
@@ -496,6 +511,36 @@ export class Visualizer extends Component {
 
         data = [main, alt];
         this.saveChanges(array,data);
-    }
+    };
 
+    selectSort = (array,data) => {
+        let [i, j, min] = data;
+        if (i === -1) {
+            i = 0;
+            j = i+1;
+            min = i;
+        }
+        this.clearSelectedElements();
+
+        this.setSelected(array,i,2);
+        this.setSelected(array,j,1);
+        this.setSelected(array,min,3);
+
+        if (!this.compareValues(array,j,min)) {
+            min = j;
+        }
+        j++;
+
+        if (j === array.length) {
+            if (min !== i) {
+                array = this.swapValues(array,i,min);
+            }
+            i ++;
+            min = i;
+            j = i + 1;
+        }
+
+        data = [i, j, min];
+        this.saveChanges(array,data);
+    }
 }
