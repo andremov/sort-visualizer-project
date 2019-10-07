@@ -41,12 +41,20 @@ export class Visualizer extends Component {
                 name: 'Quick',
                 /*
                 index
+                left
                 right
                 lo
                 hi
                  */
                 data : [-1]
-            }
+            },{
+                name: 'Insertion',
+                /*
+                main
+                alt
+                 */
+                data : [-1, -1]
+            },
         ]
     };
 
@@ -174,6 +182,13 @@ export class Visualizer extends Component {
             r = (
                 currentProcess.data[0] === 1
             );
+        } else if (processID === 4) {
+            /*
+                data.main === array.length-1
+             */
+            r = (
+              currentProcess.data[0] === array.length
+            );
         }
         return r;
     };
@@ -193,6 +208,8 @@ export class Visualizer extends Component {
             this.shortBubbleSort(array, data);
         } else if (processID === 3) {
             this.quickSort(array, data);
+        } else if (processID === 4) {
+            this.insertSort(array, data);
         }
     };
 
@@ -329,7 +346,6 @@ export class Visualizer extends Component {
 
     bubbleSort = (array, data) => {
         let [index, swaps, pass] = data;
-
         this.clearSelectedElements();
 
         index ++;
@@ -440,5 +456,33 @@ export class Visualizer extends Component {
         data[0] = [index, right, lo, hi];
         this.saveChanges(array, data);
     };
+
+    insertSort = (array,data) => {
+        let [main, alt] = data;
+        this.clearSelectedElements();
+
+        if (main === array.length) {
+            return;
+        }
+
+        if (main === -1) {
+            main = 1;
+            alt = main;
+        }
+
+        array = this.setSelected(array, alt, 1);
+        array = this.setSelected(array, main, 2);
+
+        if (alt <= 0 || this.compareValues(array,alt,alt-1)) {
+            main = main + 1;
+            alt = main;
+        } else {
+            array = this.swapValues(array, alt, alt-1);
+            alt += -1;
+        }
+
+        data = [main, alt];
+        this.saveChanges(array,data);
+    }
 
 }
