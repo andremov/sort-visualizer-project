@@ -268,14 +268,8 @@ export class Visualizer extends Component {
         let lo = Math.min(newIndex,oldIndex);
         let hi = Math.max(newIndex,oldIndex);
 
-        if (oldIndex < newIndex) {
-            for (let i = lo; i < hi; i++) {
-                array = this.swapValues(array, i, i + 1);
-            }
-        } else {
-            for (let i = hi - 1; i >= lo; i--) {
-                array = this.swapValues(array, i, i + 1);
-            }
+        for (let i = lo; i < hi; i++) {
+            array = this.swapValues(array, i, i + 1);
         }
 
         return array;
@@ -394,10 +388,10 @@ export class Visualizer extends Component {
 
     quickSort  = (array, data) => {
         if (data[0] === -1) {
-            data[0] = [-1, -1, -1, -1];
+            data[0] = [-1, -1, -1, -1, -1];
         }
 
-        let [index, right, lo, hi] = data[0];
+        let [index, left, right, lo, hi] = data[0];
         this.clearSelectedElements();
 
         if (lo < 0) {
@@ -431,29 +425,48 @@ export class Visualizer extends Component {
         this.setSelected(array, right+lo, 4);
         this.setSelected(array, lo, 2);
         this.setSelected(array, hi-1, 2);
-
-        if(!this.compareValues(current, index, pivot)) {
-            index++;
-        } else {
-            current = this.pushIntoArray(current, current.length-1, index);
-            right--;
+        if (left !== -1) {
+            this.setSelected(array, lo+left, 3);
         }
 
-        if (index > right) {
-            current = this.pushIntoArray(current, index-1, pivot);
+        if (index <= right) {
+            if (left === -1) {
+                if (!this.compareValues(current, index, pivot)) {
+                    index++;
+                } else {
+                    left = index;
+                }
+            } else {
+                if (left === current.length - 1) {
+                    left = -1;
+                    right--;
+                } else {
+                    current = this.swapValues(current, left, left + 1);
+                    left++;
+                }
+            }
+        } else {
+            if (pivot < index-1 && left === -1) {
+                left = pivot;
+            } else if (left < index-1 && left !== -1) {
+                current = this.swapValues(current, left, left+1);
+                left++;
+            } else {
+                left = -1;
 
-            // setting up for next next cycle
-            data.push( [-1, -1, lo+index, hi] );
+                // setting up for next next cycle
+                data.push( [-1, -1, -1, lo+index, hi] );
 
-            // setting up for next cycle
-            hi = lo+index-1;
-            index = -1;
-            right = -1;
+                // setting up for next cycle
+                hi = lo+index-1;
+                index = -1;
+                right = -1;
+            }
         }
 
         array = prev.concat(current,next);
 
-        data[0] = [index, right, lo, hi];
+        data[0] = [index, left, right, lo, hi];
         this.saveChanges(array, data);
     };
 
