@@ -59,7 +59,7 @@ export class Visualizer extends Component {
 
         this.setState({array});
         this.handleEvent = this.handleEvent.bind(this);
-        setInterval(this.update,100);
+        setInterval(this.update,5000);
     }
 
     getColor = (value, max) => {
