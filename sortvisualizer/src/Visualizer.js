@@ -35,17 +35,21 @@ export class Visualizer extends Component {
                 name: 'Quick',
                 /*
                 index
-                pivot
-                left
                 right
+                lo
+                hi
                  */
-                data : [-1, -1, -1, -1]
+                data : [-1]
             }
         ]
     };
 
+/*
+        COMPONENT METHODS
+ */
+
     componentDidMount() {
-        let maxValue = 20;
+        let maxValue = 50;
         let array = [];
         for (let i = 0; i < maxValue; i++) {
             array.push({
@@ -58,28 +62,43 @@ export class Visualizer extends Component {
 
         this.setState({array});
         this.handleEvent = this.handleEvent.bind(this);
-        setInterval(this.update,5000);
+        setInterval(this.update,100);
     }
+
+    render() {
+        const {sorts, array} = this.state;
+        const styles = ['','one', 'two','three','four'];
+
+        return (
+            <div className='view'>
+
+                <div className='graph'>
+                    {array.map(item => {return(
+                        <div key={item.value} className='bar'>
+                            <div style={{height: ((item.value/array.length)*90)+'%', backgroundColor: this.getColor(item.value,array.length) }} className={'value '+(item.selected > 0?'selected '+styles[item.selected]:'')}>
+                            </div>
+                        </div>
+                    )})}
+                </div>
+
+                <div className='panel'>
+                    {sorts.map(item => {return(
+                        <div key={sorts.indexOf(item)} className='btn' onClick={(e) => this.handleEvent(sorts.indexOf(item))}>
+                            {item.name}
+                        </div>
+                    )})}
+                </div>
+            </div>
+        );
+    }
+
+/*
+        VISUAL METHODS
+ */
 
     getColor = (value, max) => {
         let p = ((value/max)*.9)+.1;
-        let v = 'rgba(9,211,172,'+p+')';
-        return v;
-    };
-
-    scrambleIterative = (array) => {
-        for (let i = 0; i < array.length; i++) {
-            let min = i+1;
-            let max = array.length-1;
-
-            let valueA = array[i].value;
-            let shuffleIndex = this.getRndInteger(min,max);
-
-            let valueB = array[shuffleIndex].value;
-
-            array[shuffleIndex].value = valueA;
-            array[i].value = valueB;
-        }
+        return 'rgba(9,211,172,' + p + ')';
     };
 
     clearSelectedElements = () => {
@@ -89,6 +108,15 @@ export class Visualizer extends Component {
         }
         this.setState({array});
     };
+
+    setSelected = (array, index, value) => {
+        array[index].selected = value;
+        return array;
+    };
+
+/*
+        UPDATE METHODS
+ */
 
     clearProcess = () => {
         let {processID} = this.state;
@@ -133,7 +161,7 @@ export class Visualizer extends Component {
                 data.index >= array.length
              */
             r = (
-                currentProcess.data[0] >= array.length
+                currentProcess.data[0] === 1
             );
         }
         return r;
@@ -153,15 +181,8 @@ export class Visualizer extends Component {
         } else if (processID === 2) {
             this.bubbleSort2(array, data);
         } else if (processID === 3) {
-            this.quicksort3(array, data);
+            this.quicksort(array, data);
         }
-    };
-
-    saveChanges = (array, data) => {
-        this.setState({array});
-        let {processID, sorts} = this.state;
-        sorts[processID].data = data;
-        this.setState({sorts});
     };
 
     update = () => {
@@ -179,19 +200,42 @@ export class Visualizer extends Component {
         }
     };
 
+/*
+            FUNCTIONAL METHODS
+ */
+
     getRndInteger(min, max) {
         return Math.floor(Math.random() * (max - min) ) + min;
     }
 
-    setSelected = (array, index, value) => {
-      array[index].selected = value;
-      return array;
-    };
+/*
+        ARRAY HANDLING METHODS
+ */
 
     swapValues = (array, indexA, indexB) => {
         let valueA = array[indexA].value;
         array[indexA].value = array[indexB].value;
         array[indexB].value = valueA;
+
+        return array;
+    };
+
+    pushIntoArray = (array, newIndex, oldIndex) => {
+        if (newIndex === oldIndex)
+            return array;
+
+        let lo = Math.min(newIndex,oldIndex);
+        let hi = Math.max(newIndex,oldIndex);
+
+        if (oldIndex < newIndex) {
+            for (let i = lo; i < hi; i++) {
+                array = this.swapValues(array, i, i + 1);
+            }
+        } else {
+            for (let i = hi - 1; i >= lo; i--) {
+                array = this.swapValues(array, i, i + 1);
+            }
+        }
 
         return array;
     };
@@ -217,6 +261,32 @@ export class Visualizer extends Component {
 
         this.saveChanges(array,data);
     };
+
+    saveChanges = (array, data) => {
+        this.setState({array});
+        let {processID, sorts} = this.state;
+        sorts[processID].data = data;
+        this.setState({sorts});
+    };
+
+    scrambleIterative = (array) => {
+        for (let i = 0; i < array.length; i++) {
+            let min = i+1;
+            let max = array.length-1;
+
+            let valueA = array[i].value;
+            let shuffleIndex = this.getRndInteger(min,max);
+
+            let valueB = array[shuffleIndex].value;
+
+            array[shuffleIndex].value = valueA;
+            array[i].value = valueB;
+        }
+    };
+
+/*
+        SORTS
+ */
 
     bubbleSort = (array, data) => {
         let [index, swaps, pass] = data;
@@ -268,199 +338,78 @@ export class Visualizer extends Component {
         this.saveChanges(array,data);
     };
 
-    quickSort = (array, data) => {
-        let [parts, segment, i, j, dir] = data;
+    quicksort  = (array, data) => {
+        if (data[0] === -1) {
+            data[0] = [-1, -1, -1, -1];
+        }
+
+        let [index, right, lo, hi] = data[0];
         this.clearSelectedElements();
 
-        parts = parts < 0? 1 : parts;
-        segment = segment < 0? 0 : segment;
 
-        if (segment >= parts) {
-            parts *= Math.pow(2,dir*-1);
-            segment = 0;
+        if (lo < 0) {
+            lo = 0;
+            hi = array.length;
         }
 
-        let segSize = Math.floor((array.length-1)/parts);
-
-        let lo = segSize * segment;
-        let hi = lo + segSize;
-        // let med = Math.floor(lo + (segSize/2));
-
-        if (segSize <= 3) {
-            dir *= -1;
-            parts *= Math.pow(2,dir*-1);
-            segment = 0;
-            data =  [parts, segment, i, j, dir];
-            this.saveChanges(array,data);
-            return;
-        }
-
-        if (i === -1 && j === -1) {
-            i = lo;
-            j = hi;
-        }
-
-        array = this.setSelected(array, lo, 2);
-        array = this.setSelected(array, hi, 2);
-
-        // array = this.setSelected(array, med, 3);
-
-        array = this.setSelected(array, i, 1);
-        // array = this.setSelected(array, j, 1);
-
-        let pivot = array[hi].value;
-
-        if (array[i].value < pivot) {
-            i = i + 1;
-            data =  [parts, segment, i, j, dir];
-            this.saveChanges(array,data);
-            return;
-        }
-/*
-        if (array[j].value > pivot) {
-            j = j - 1;
-            data =  [parts, segment, i, j, dir];
-            this.saveChanges(array,data);
-            return;
-        }
- */
-        if (i >= j) {
-            segment ++;
-            i = -1;
-            j = -1;
-            data =  [parts, segment, i, j, dir];
-            this.saveChanges(array,data);
-            return;
-        }
-
-        array = this.swapValues(array,i,hi);
-
-        data =  [parts, segment, i, j, dir];
-        this.saveChanges(array,data);
-    };
-
-    quickSort2 = (array, data) => {
-        let [parts, segment, i, j, dir] = data;
-        let low = 0;
-        let high = 0;
-        this.clearSelectedElements();
-
-        /* low  --> Starting index,  high  --> Ending index */
-        if (low < high) {
-            /* pi is partitioning index, arr[pi] is now
-               at right place */
-            let pi = this.partition(array, low, high);
-
-            this.quickSort2(array, low, pi - 1);  // Before pi
-            this.quickSort2(array, pi + 1, high); // After pi
-        }
-    };
-
-    partition = (array, data) => {
-        // pivot (Element to be placed at right position)
-        let high = 0;
-        let low = 0;
-        let pivot = array[high];
-
-        let i = (low - 1)  // Index of smaller element
-
-        for (let j = low; j <= high - 1; j++)
-        {
-            // If current element is smaller than the pivot
-            if (array[j] < pivot);
-            {
-                i++;
-                // increment index of smaller element
-
-                array = this.swapValues(array,i,j);
+        if (hi-lo < 2) {
+            data.splice(0,1);
+            if (data.length === 0) {
+                data.push(1);
             }
-        }
-        array = this.swapValues(array,i+1, high);
-        return (i + 1);
-    };
-
-    pushIntoArray = (array, newIndex, oldIndex) => {
-        if (newIndex === oldIndex) {
-            return array;
-        }
-        let lo = Math.min(newIndex,oldIndex);
-        let hi = Math.max(newIndex,oldIndex);
-
-        //let value = array[hi];
-
-        for (let i = hi-1; i >= lo; i--) {
-            array = this.swapValues(array,i,i+1);
+            this.saveChanges(array, data);
+            return;
         }
 
-        return array;
-    };
+        let pivot = 0;
 
-    quicksort3  = (array, data) => {
-        let [index, pivot, left, right] = data;
-        this.clearSelectedElements();
+        let prev = array.slice(0,lo);
+        let current = array.slice(lo,hi);
+        let next = array.slice(hi,array.length);
 
         if (index < 0) {
             index = 1;
-            pivot = 0;
-            left = 1;
-            right = array.length-1;
+            right = current.length-1;
         }
 
-        let pivotValue = array[pivot].value;
+        let pivotValue = current[pivot].value;
 
-        this.setSelected(array, pivot, 2);
-        this.setSelected(array, index, 1);
-        this.setSelected(array, left, 3);
-        this.setSelected(array, right, 3);
+        this.setSelected(array, index+lo, 1);
+        this.setSelected(array, pivot+lo, 3);
+        this.setSelected(array, lo+1, 4);
+        this.setSelected(array, right+lo, 4);
+        this.setSelected(array, lo, 2);
+        this.setSelected(array, hi-1, 2);
 
-        console.log(array[index].value,pivotValue);
-
-        if(array[index].value < pivotValue) {
-            console.log('left');
-            array = this.pushIntoArray(array,left,index);
-            left++;
+        if(current[index].value < pivotValue) {
+            index++;
         } else {
-            console.log('right');
-            console.log('inserting ' +array[index].value+' into '+right);
-            array = this.pushIntoArray(array,right,index);
+            current = this.pushIntoArray(current, current.length-1, index);
             right--;
         }
+/*
+        a = '';
+        for (let i = 0; i < current.length; i++) {
+            a += current[i].value + ', '
+        }
+        console.log(a);
+ */
+        if (index > right) {
+            current = this.pushIntoArray(current, index-1, pivot);
 
-        index++;
+            // setting up for next next cycle
+            data.push( [-1, -1, lo+index, hi] );
 
-        if (index === array.length) {
-            array = this.pushIntoArray(array,left,pivot);
-
+            // setting up for next cycle
+            hi = lo+index-1;
+            index = -1;
+            right = -1;
         }
 
-        data = [index, pivot, left, right];
-        this.saveChanges(array,data);
+        array = prev.concat(current,next);
+
+        data[0] = [index, right, lo, hi];
+        this.saveChanges(array, data);
     };
 
-    render() {
-        const {sorts, array} = this.state;
-        const styles = ['','one', 'two','three','four'];
-
-        return (
-            <div className='view'>
-
-                <div className='graph'>
-                    {array.map(item => {return(
-                        <div key={item.value} className='bar'>
-                            <div style={{height: ((item.value/array.length)*90)+'%', backgroundColor: this.getColor(item.value,array.length) }} className={'value '+(item.selected > 0?'selected '+styles[item.selected]:'')}>
-                            </div>
-                        </div>
-                    )})}
-                </div>
-
-                <div className='panel'>
-                    {sorts.map(item => {return(
-                        <div key={sorts.indexOf(item)} className='btn' onClick={(e) => this.handleEvent(sorts.indexOf(item))}>
-                            {item.name}
-                        </div>
-                    )})}
-                </div>
-            </div>
-        );
-    }
 }
