@@ -34,13 +34,12 @@ export class Visualizer extends Component {
             {
                 name: 'Quick',
                 /*
-                parts
-                segment
-                i
-                j
-                dir
+                index
+                pivot
+                left
+                right
                  */
-                data : [-1, -1, -1, -1, -1]
+                data : [-1, -1, -1, -1]
             }
         ]
     };
@@ -131,10 +130,10 @@ export class Visualizer extends Component {
             );
         } else if (processID === 3) {
             /*
-                data.parts < data.segment && data.dir === -1
+                data.index >= array.length
              */
             r = (
-                currentProcess.data[0] < currentProcess.data[1] && currentProcess.data[4] === 1
+                currentProcess.data[0] >= array.length
             );
         }
         return r;
@@ -154,7 +153,7 @@ export class Visualizer extends Component {
         } else if (processID === 2) {
             this.bubbleSort2(array, data);
         } else if (processID === 3) {
-            this.quickSort(array, data);
+            this.quicksort3(array, data);
         }
     };
 
@@ -378,6 +377,64 @@ export class Visualizer extends Component {
         }
         array = this.swapValues(array,i+1, high);
         return (i + 1);
+    };
+
+    pushIntoArray = (array, newIndex, oldIndex) => {
+        if (newIndex === oldIndex) {
+            return array;
+        }
+        let lo = Math.min(newIndex,oldIndex);
+        let hi = Math.max(newIndex,oldIndex);
+
+        //let value = array[hi];
+
+        for (let i = hi-1; i >= lo; i--) {
+            array = this.swapValues(array,i,i+1);
+        }
+
+        return array;
+    };
+
+    quicksort3  = (array, data) => {
+        let [index, pivot, left, right] = data;
+        this.clearSelectedElements();
+
+        if (index < 0) {
+            index = 1;
+            pivot = 0;
+            left = 1;
+            right = array.length-1;
+        }
+
+        let pivotValue = array[pivot].value;
+
+        this.setSelected(array, pivot, 2);
+        this.setSelected(array, index, 1);
+        this.setSelected(array, left, 3);
+        this.setSelected(array, right, 3);
+
+        console.log(array[index].value,pivotValue);
+
+        if(array[index].value < pivotValue) {
+            console.log('left');
+            array = this.pushIntoArray(array,left,index);
+            left++;
+        } else {
+            console.log('right');
+            console.log('inserting ' +array[index].value+' into '+right);
+            array = this.pushIntoArray(array,right,index);
+            right--;
+        }
+
+        index++;
+
+        if (index === array.length) {
+            array = this.pushIntoArray(array,left,pivot);
+
+        }
+
+        data = [index, pivot, left, right];
+        this.saveChanges(array,data);
     };
 
     render() {
